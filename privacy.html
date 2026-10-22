@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Privacy policy</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍛%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><span data-brand></span></a>
+      <nav class="nav" aria-label="Main"><a href="index.html#menu">Back to the menu</a></nav>
+    </div>
+  </header>
+
+  <main class="container narrow legal">
+    <h1>Privacy policy</h1>
+    <p class="muted">Last updated: <span id="updated"></span></p>
+
+    <p>We're a small kitchen, and we'd rather tell you plainly what happens to your information than hide it in legal language. Here's all of it.</p>
+
+    <h2>What we collect</h2>
+    <p>Only what we need to get food to you, and only when you place an order:</p>
+    <ul>
+      <li>your name and mobile number</li>
+      <li>your delivery address, pincode and landmark</li>
+      <li>what you ordered, when you want it, how you'll pay, and any cooking notes</li>
+    </ul>
+    <p>We don't ask for your email, date of birth, card details or anything else. <strong>We will never ask for an OTP, password or card number</strong> — not on this site, not on the phone, not on WhatsApp.</p>
+
+    <h2>How your order reaches us</h2>
+    <p>This website does not send your details to any server of ours. When you press "Send order on WhatsApp", your order is written into a WhatsApp message, and it reaches us only when you press send yourself. WhatsApp is run by Meta, and that message is covered by <a href="https://www.whatsapp.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">WhatsApp's privacy policy</a>.</p>
+
+    <h2>What we use it for</h2>
+    <ul>
+      <li>cooking and delivering your order</li>
+      <li>calling or messaging you about that order (for example, if we can't find your address)</li>
+      <li>keeping the billing records the law requires us to keep</li>
+    </ul>
+    <p>We won't send you offers or promotions unless you ask us to.</p>
+
+    <h2>Who else sees it</h2>
+    <p>The person delivering your food sees your name, number and address so they can reach you. That's it. We never sell, rent or trade your information.</p>
+
+    <h2>How long we keep it</h2>
+    <p>We keep order details only as long as we need them to deliver your order and to keep the tax and accounting records Indian law requires. After that, we delete them.</p>
+
+    <h2>What stays on your own device</h2>
+    <p>Your cart is saved in your browser so it's still there if you close the page. If you tick "Remember my details on this device", your name, number and address are saved in your browser too, so you don't have to type them again. This stays on your phone or computer — it isn't sent to us.</p>
+    <p>You can remove it any time: <button type="button" class="link-btn dark" id="forgetMe">forget my saved details</button>.</p>
+
+    <h2>No tracking</h2>
+    <p>This website uses no cookies, no analytics, no advertising pixels and no third-party scripts. We don't know who visits it, and nor does anyone else through us.</p>
+
+    <h2>Your rights</h2>
+    <p>Under India's Digital Personal Data Protection Act, 2023, you can ask us to show you what we hold about you, correct it, or delete it. You can also withdraw your consent at any time. Just contact us below — we'll reply within 7 days. If you're not happy with our answer, you can complain to the Data Protection Board of India.</p>
+
+    <h2>Contact</h2>
+    <p>
+      <span id="contactName"></span>, <span data-brand></span><br />
+      <span id="contactAddress"></span><br />
+      <a id="contactEmail"></a> · <a id="contactPhone"></a>
+    </p>
+
+    <h2>Changes</h2>
+    <p>If we change how we handle your information, we'll update this page and the date at the top.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container small muted">© <span id="year"></span> <span data-brand></span></div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/privacy.js"></script>
+</body>
+</html>

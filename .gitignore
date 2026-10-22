@@ -1,0 +1,4 @@
+# Local-only files: not part of the published website
+.claude/
+*.zip
+Jishas-Pantry-preview.html

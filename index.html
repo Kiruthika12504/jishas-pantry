@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Only this site's own files may load. No trackers, ads or third-party scripts. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Jisha's Pantry — Order Online</title>
+  <meta name="description" content="A small cloud kitchen cooking ten dishes, made to order. Biryani, curries, dosa and more, delivered in Chennai." />
+  <meta name="theme-color" content="#232c29" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍛%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <a href="#menu" class="skip">Skip to menu</a>
+  <div class="preview-banner" id="previewBanner" hidden>Preview with a sample menu and details. Orders placed here are not sent anywhere.</div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#top" class="logo"><span data-brand></span></a>
+      <span class="status-pill" id="statusPill"></span>
+      <nav class="nav" aria-label="Main">
+        <a href="#menu">Menu</a>
+        <a href="#story">Our story</a>
+        <a href="#faq">Questions</a>
+      </nav>
+      <button class="cart-btn" id="openCart" aria-label="Open cart">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span>Cart</span>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">A small kitchen in <span data-city></span></p>
+          <h1>Food we'd happily serve at our own table.</h1>
+          <p class="lead">Ten dishes. That's the whole menu. We keep it short so every plate is cooked to order and tastes the way it does at home.</p>
+          <div class="hero-cta">
+            <a href="#menu" class="btn btn-primary">See the menu</a>
+            <a href="#story" class="btn btn-ghost">Who we are</a>
+          </div>
+          <ul class="hero-facts">
+            <li><strong id="factHours"></strong><span>kitchen hours</span></li>
+            <li><strong id="factFree"></strong><span>free delivery above</span></li>
+            <li><strong>10</strong><span>dishes, made to order</span></li>
+          </ul>
+        </div>
+        <aside class="note" aria-label="Note from the kitchen">
+          <p class="note-label">Today's note</p>
+          <p class="note-text" id="kitchenNote"></p>
+          <p class="note-sign" id="kitchenNoteSign"></p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="menu-section" id="menu">
+      <div class="container">
+        <div class="section-head">
+          <h2>The menu</h2>
+          <p class="muted">Prices include everything except GST, packaging and delivery, which you'll see before you order.</p>
+        </div>
+
+        <div class="menu-tools">
+          <div class="chips" id="categoryChips" role="tablist" aria-label="Categories"></div>
+          <div class="tool-row">
+            <label class="search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="search" id="searchInput" placeholder="Search dishes" aria-label="Search dishes" maxlength="40" />
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="vegOnly" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span>Veg only</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="menu-grid" id="menuGrid"></div>
+        <p class="empty muted" id="menuEmpty" hidden>Nothing matches that. Try another search?</p>
+      </div>
+    </section>
+
+    <section class="story" id="story">
+      <div class="container story-inner">
+        <figure class="story-photo">
+          <!-- Replace with a real photo of you / your team in the kitchen: images/team.jpg -->
+          <div class="photo-placeholder">Add a real photo of you<br />and your kitchen here</div>
+        </figure>
+        <div>
+          <h2>Why we started</h2>
+          <!-- SAMPLE TEXT for the preview. Replace with the owner's real story, in their own words, before going live. -->
+          <p>Most of these recipes came from my mother's kitchen. The biryani is hers, the kothu parotta is from the street stall near our old house, and the curd rice is exactly how she packed it for school.</p>
+          <p>When we moved to the city, everything we ordered tasted the same: too oily, too rushed, or reheated. So we started cooking for friends, then for their friends, and this kitchen grew from there.</p>
+          <p>We keep the menu small on purpose. Ten dishes we can cook properly every single day, rather than fifty we'd have to cut corners on.</p>
+          <p class="signature">— The family behind the kitchen</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <div class="container">
+        <div class="section-head">
+          <h2>How ordering works</h2>
+          <p class="muted">No app, no sign-up. Your order comes straight to us.</p>
+        </div>
+        <ol class="steps">
+          <li><h3>Pick your dishes</h3><p>Add what you like to the cart. Choose "as soon as possible" or a later time slot.</p></li>
+          <li><h3>Send it on WhatsApp</h3><p>Your order opens in WhatsApp, already written out. Press send and a real person in our kitchen replies to confirm.</p></li>
+          <li><h3>We cook, then deliver</h3><p>Your food is cooked after you order, packed in sealed containers and brought to your door.</p></li>
+        </ol>
+
+        <!-- Only keep promises you actually keep every day. -->
+        <div class="promise">
+          <div><h3>Cooked to order</h3><p>Nothing sits in a warmer waiting for someone to order it.</p></div>
+          <div><h3>Clean kitchen</h3><p>FSSAI-registered. Our licence number is at the bottom of this page.</p></div>
+          <div><h3>Honest pricing</h3><p>The total you see at checkout is what you pay. No surprise charges at the door.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq" id="faq">
+      <div class="container narrow">
+        <div class="section-head">
+          <h2>Questions people ask us</h2>
+        </div>
+        <details><summary>Where do you deliver?</summary><p id="faqArea"></p></details>
+        <details><summary>How do I pay?</summary><p>By UPI or cash when your food arrives. We never ask for card details, OTPs or passwords — if anyone claiming to be us does, it isn't us.</p></details>
+        <details><summary>Is there a minimum order?</summary><p id="faqMin"></p></details>
+        <details><summary>Can I order for later?</summary><p>Yes. At checkout, pick a time slot for later today or tomorrow.</p></details>
+        <details><summary>Something's wrong with my order. What now?</summary><p>Message us on WhatsApp with a photo. If we got it wrong, we'll replace the dish or refund you — no long back-and-forth.</p></details>
+        <details><summary>What do you do with my details?</summary><p>We use your name, number and address only to deliver your order. We don't sell or share them, and this website has no tracking. <a href="privacy.html">Read the privacy policy</a>.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <a href="#top" class="logo"><span data-brand></span></a>
+        <p class="muted small" id="footerAddress"></p>
+        <p class="muted small" id="footerFssai"></p>
+      </div>
+      <div>
+        <h4>Talk to us</h4>
+        <p class="small"><a id="footerPhone"></a></p>
+        <p class="small"><a id="footerEmail"></a></p>
+        <p class="small"><a id="footerWhatsapp" target="_blank" rel="noopener noreferrer">WhatsApp us</a></p>
+      </div>
+      <div>
+        <h4>Hours</h4>
+        <p class="small" id="footerHours"></p>
+        <p class="small"><a href="privacy.html">Privacy policy</a></p>
+        <p class="small"><button type="button" class="link-btn" id="forgetMe">Forget my saved details</button></p>
+      </div>
+    </div>
+    <div class="container small muted copyright">© <span id="year"></span> <span data-brand></span></div>
+  </footer>
+
+  <!-- Sticky cart bar (mobile) -->
+  <button class="cart-bar" id="cartBar" hidden>
+    <span id="cartBarCount"></span>
+    <span class="cart-bar-cta">View cart <span id="cartBarTotal"></span> →</span>
+  </button>
+
+  <!-- Cart drawer -->
+  <dialog class="drawer" id="cartDrawer" aria-labelledby="cartTitle">
+    <div class="drawer-head">
+      <h2 id="cartTitle">Your order</h2>
+      <button class="icon-btn" data-close aria-label="Close cart">✕</button>
+    </div>
+    <div class="drawer-body" id="cartBody"></div>
+    <div class="drawer-foot" id="cartFoot"></div>
+  </dialog>
+
+  <!-- Checkout -->
+  <dialog class="modal" id="checkoutModal" aria-labelledby="checkoutTitle">
+    <form id="checkoutForm" novalidate autocomplete="on">
+      <div class="drawer-head">
+        <h2 id="checkoutTitle">Where should we bring it?</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close checkout">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="fName">Your name</label>
+          <input id="fName" name="name" autocomplete="name" required maxlength="60" />
+        </div>
+        <div class="field">
+          <label for="fPhone">Mobile number</label>
+          <input id="fPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit mobile" required pattern="[6-9][0-9]{9}" maxlength="10" />
+        </div>
+        <div class="field">
+          <label for="fAddress">Delivery address</label>
+          <textarea id="fAddress" name="address" rows="2" autocomplete="street-address" placeholder="Flat / house no., street, area" required maxlength="200"></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="fPincode">Pincode</label>
+            <input id="fPincode" name="pincode" inputmode="numeric" autocomplete="postal-code" maxlength="6" required pattern="[0-9]{6}" />
+          </div>
+          <div class="field">
+            <label for="fLandmark">Landmark <span class="muted">(optional)</span></label>
+            <input id="fLandmark" name="landmark" maxlength="60" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="fSlot">When?</label>
+          <select id="fSlot" name="slot" required></select>
+        </div>
+        <fieldset class="field">
+          <legend>Payment</legend>
+          <div class="radio-row" id="paymentOptions"></div>
+        </fieldset>
+        <div class="field">
+          <label for="fNotes">Anything we should know? <span class="muted">(optional)</span></label>
+          <input id="fNotes" name="notes" placeholder="e.g. less spicy, no onion, call on arrival" maxlength="140" />
+        </div>
+        <label class="check">
+          <input type="checkbox" id="fRemember" />
+          <span>Remember my details on this device for next time</span>
+        </label>
+        <p class="form-error" id="formError" role="alert"></p>
+      </div>
+      <div class="drawer-foot">
+        <div class="bill-line total"><span>To pay</span><span id="checkoutTotal"></span></div>
+        <button type="submit" class="btn btn-primary btn-block">Send order on WhatsApp</button>
+        <p class="tiny muted center">Your order opens in WhatsApp, ready to send. Your details go only to us. <a href="privacy.html" target="_blank">Privacy</a></p>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Order handed to WhatsApp -->
+  <dialog class="modal" id="successModal" aria-labelledby="successTitle">
+    <div class="success">
+      <h2 id="successTitle">Almost done — just press send</h2>
+      <p id="successText">Your order <strong id="successId"></strong> is written out in WhatsApp. Press <strong>send</strong> and we'll reply to confirm it.</p>
+      <p class="small muted" id="successHelp">WhatsApp didn't open? <a id="successLink" target="_blank" rel="noopener noreferrer">Tap here to open it again</a>.</p>
+      <pre class="order-preview" id="orderPreview" hidden></pre>
+      <button class="btn btn-primary" data-close>Okay</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
