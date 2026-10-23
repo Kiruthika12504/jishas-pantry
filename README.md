@@ -13,7 +13,37 @@ A simple ordering website for a small cloud kitchen. Customers browse the menu, 
 | `images/` | Put your food and team photos here |
 | `_headers` | Security settings for hosting (Netlify / Cloudflare Pages) |
 
+## Accounts and the admin menu manager (Supabase)
+
+Customer sign-up / login (`account.html`) and the menu manager (`admin.html`) run on a free
+[Supabase](https://supabase.com) project. Security lives in the database rules in
+`supabase/schema.sql`: anyone can read the menu, only admins can change it, and each customer
+can only see their own details.
+
+One-time setup:
+
+1. Create a Supabase project (region **South Asia (Mumbai)**).
+2. **SQL Editor → New query**: paste all of `supabase/schema.sql` and press **Run**.
+   This creates the tables, security rules, the photo store and the starting dishes.
+3. **Authentication → URL Configuration**:
+   - Site URL: `https://kiruthika12504.github.io/jishas-pantry/`
+   - Redirect URLs: add `https://kiruthika12504.github.io/jishas-pantry/account.html`
+     (and `http://localhost:5500/account.html` for testing on your computer).
+4. **Connect** (or Project Settings → API): copy the **Project URL** and the **anon / publishable**
+   key into `supabaseUrl` / `supabaseAnonKey` in `js/config.js`.
+   Never put the `service_role` / secret key in any website file.
+5. Sign up on the website with the kitchen's email, confirm it, then run `supabase/make-admin.sql`
+   in the SQL Editor (type the email there, not in the file). Log in again: the account page now
+   shows **Manage the menu**.
+
+Supabase's built-in email sender is for testing (a few emails per hour). Before launch, set up
+your own email sender under **Authentication → Emails → SMTP** (e.g. Brevo or Resend, both have
+free tiers) so sign-up and password-reset emails arrive reliably.
+
 ## Day-to-day edits
+
+Once Supabase is connected, add, edit, hide and delete dishes at `admin.html` — no code changes.
+Before that (or if Supabase is ever unreachable), the menu comes from `js/menu.js`:
 
 - **Sold out?** In `js/menu.js`, set `available: false` on that dish.
 - **Change a price:** edit `price` in `js/menu.js`.
@@ -39,6 +69,9 @@ People can tell a template from a real kitchen. These are what make the differen
 - [ ] **Only promises you keep.** Check the "Cooked to order / Clean kitchen / Honest pricing" boxes in `index.html` and the descriptions in `menu.js`. Delete anything that isn't true every day.
 - [ ] **No fake reviews or numbers.** Add reviews only once real customers give them, with permission, using first name and area only.
 - [ ] Fill `privacyContactName` in `js/config.js`, and have someone qualified check `privacy.html` against your actual practice.
+- [ ] Fill `legalName` and `grievanceOfficer` in `js/config.js` (required by the Consumer Protection (E-Commerce) Rules, 2020; shown on the Terms page), and check the refund promises in `terms.html` are ones you'll keep.
+- [ ] Update the business details in the `application/ld+json` block in `index.html` (used by Google).
+- [ ] Remove the `<meta name="robots" content="noindex" />` line from `index.html` so search engines can list the site.
 - [ ] **Last step:** set `previewMode: false` in `js/config.js`. Until then the site shows a "preview" banner, and orders are shown on screen instead of sent, so no order can reach a wrong number. The "Why we started" text is also sample writing until it's replaced.
 
 ## Legal basics (India)

@@ -1,40 +1,25 @@
+// Home page: menu, cart and WhatsApp checkout.
 (function () {
   "use strict";
 
   const C = window.CK_CONFIG;
-  const MENU = window.CK_MENU;
-  const byId = Object.fromEntries(MENU.map((item) => [item.id, item]));
+  const { $, $$, esc, money, toMins, fmtTime, store, toast, digits } = window.CK;
+  const backend = window.CK.backend;
   const MAX_QTY = 20;
   const SPICE = ["", "Mild", "Medium", "Spicy"];
   const KEYS = { cart: "ck_cart", customer: "ck_customer" };
-
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  const money = (n) => C.currency + Math.round(n).toLocaleString("en-IN");
-  const esc = (s) =>
-    String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const clean = (s, max) => String(s || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
 
-  // localStorage can be blocked (private mode, strict settings) — never let that break ordering.
-  const store = {
-    get(key, fallback) {
-      try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
-    },
-    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore */ } },
-    remove(key) { try { localStorage.removeItem(key); } catch { /* ignore */ } },
-  };
+  let MENU = [];
+  let byId = {};
+  let cart = {};
+  let signedIn = false;
 
   // ---------- Time ----------
-  const toMins = (hm) => { const [h, m] = hm.split(":").map(Number); return h * 60 + m; };
   const OPEN = toMins(C.hours.open);
   const CLOSE = toMins(C.hours.close);
   const nowMins = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
   const isOpen = () => { const m = nowMins(); return m >= OPEN && m < CLOSE; };
-  function fmtTime(mins) {
-    const h = Math.floor(mins / 60) % 24, m = mins % 60;
-    const h12 = h % 12 || 12, ap = h < 12 ? "AM" : "PM";
-    return m ? `${h12}:${String(m).padStart(2, "0")} ${ap}` : `${h12} ${ap}`;
-  }
   const roundUp30 = (m) => Math.ceil(m / 30) * 30;
 
   function buildSlots() {
@@ -60,7 +45,6 @@
     }
     return out;
   }
-  let cart = sanitizeCart(store.get(KEYS.cart, {}));
 
   function setQty(id, qty) {
     const item = byId[id];
@@ -84,27 +68,37 @@
   // ---------- Menu ----------
   const filters = { category: "All", search: "", vegOnly: false };
 
+  function setMenu(items) {
+    MENU = items;
+    byId = Object.fromEntries(MENU.map((item) => [item.id, item]));
+    cart = sanitizeCart(store.get(KEYS.cart, {}));
+    renderChips();
+    renderMenu();
+    renderCartState();
+  }
+
   function renderChips() {
     const cats = ["All", ...new Set(MENU.map((i) => i.category))];
+    if (!cats.includes(filters.category)) filters.category = "All";
     $("#categoryChips").innerHTML = cats
-      .map((c) => `<button class="chip" role="tab" data-cat="${esc(c)}" aria-selected="${c === filters.category}">${esc(c)}</button>`)
+      .map((c) => `<button type="button" class="chip" data-cat="${esc(c)}" aria-pressed="${c === filters.category}">${esc(c)}</button>`)
       .join("");
   }
 
   function actionHtml(item) {
     if (!item.available) return `<span class="sold-label">Sold out today</span>`;
     const q = cart[item.id] || 0;
-    if (!q) return `<button class="add-btn" data-act="inc" data-id="${esc(item.id)}" aria-label="Add ${esc(item.name)}">ADD</button>`;
-    return `<div class="qty">
-      <button data-act="dec" data-id="${esc(item.id)}" aria-label="Remove one ${esc(item.name)}">−</button>
+    if (!q) return `<button type="button" class="add-btn" data-act="inc" data-id="${esc(item.id)}" aria-label="Add ${esc(item.name)} to cart">ADD</button>`;
+    return `<div class="qty" role="group" aria-label="${esc(item.name)} quantity">
+      <button type="button" data-act="dec" data-id="${esc(item.id)}" aria-label="Remove one ${esc(item.name)}">−</button>
       <span aria-live="polite">${q}</span>
-      <button data-act="inc" data-id="${esc(item.id)}" aria-label="Add one more ${esc(item.name)}">+</button>
+      <button type="button" data-act="inc" data-id="${esc(item.id)}" aria-label="Add one more ${esc(item.name)}">+</button>
     </div>`;
   }
 
   function dishHtml(item) {
     const media = item.image
-      ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" width="400" height="250" />`
+      ? `<img src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" decoding="async" width="400" height="250" />`
       : `<span class="dish-emoji" aria-hidden="true">${esc(item.emoji || "🍽️")}</span>`;
     const tag = item.tags && item.tags.length ? `<span class="dish-tag">${esc(item.tags[0])}</span>` : "";
     const spice = item.spice ? `<span class="spice-label">${SPICE[item.spice] || ""}</span>` : "";
@@ -132,7 +126,20 @@
       (!q || i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q))
     );
     $("#menuGrid").innerHTML = items.map(dishHtml).join("");
-    $("#menuEmpty").hidden = items.length > 0;
+    $("#menuEmpty").hidden = items.length > 0 || MENU.length === 0;
+  }
+
+  async function loadMenu() {
+    if (!backend.enabled) { setMenu(window.CK_MENU); return; }
+    const status = $("#menuStatus");
+    status.hidden = false;
+    status.innerHTML = "Loading today's menu…";
+    try {
+      setMenu(await backend.loadDishes());
+      status.hidden = true;
+    } catch (err) {
+      status.innerHTML = `${esc(err.message)} <button type="button" class="btn btn-ghost btn-sm" id="retryMenu">Try again</button>`;
+    }
   }
 
   // ---------- Cart UI ----------
@@ -140,6 +147,7 @@
     for (const el of $$(".dish-action")) el.innerHTML = actionHtml(byId[el.dataset.id]);
     const b = bill();
     $("#cartCount").textContent = b.count;
+    $("#openCart").setAttribute("aria-label", `Open cart, ${b.count} item${b.count === 1 ? "" : "s"}`);
     const bar = $("#cartBar");
     bar.hidden = b.count === 0;
     $("#cartBarCount").textContent = `${b.count} item${b.count === 1 ? "" : "s"}`;
@@ -161,7 +169,7 @@
     const b = bill();
     const body = $("#cartBody"), foot = $("#cartFoot");
     if (!b.count) {
-      body.innerHTML = `<div class="cart-empty"><p><strong>Nothing here yet.</strong></p><p class="muted">Pick something from the menu and it'll show up here.</p><button class="btn btn-ghost" data-browse>Back to the menu</button></div>`;
+      body.innerHTML = `<div class="cart-empty"><p><strong>Nothing here yet.</strong></p><p class="muted">Pick something from the menu and it'll show up here.</p><button type="button" class="btn btn-ghost" data-browse>Back to the menu</button></div>`;
       foot.innerHTML = "";
       return;
     }
@@ -172,10 +180,10 @@
           <div class="cart-item-name"><span class="diet ${item.veg ? "veg" : "nonveg"}" aria-hidden="true"></span>${esc(item.name)}</div>
           <div class="cart-item-price">${money(item.price)} each</div>
         </div>
-        <div class="qty sm">
-          <button data-act="dec" data-id="${esc(id)}" aria-label="Remove one ${esc(item.name)}">−</button>
+        <div class="qty sm" role="group" aria-label="${esc(item.name)} quantity">
+          <button type="button" data-act="dec" data-id="${esc(id)}" aria-label="Remove one ${esc(item.name)}">−</button>
           <span>${q}</span>
-          <button data-act="inc" data-id="${esc(id)}" aria-label="Add one more ${esc(item.name)}">+</button>
+          <button type="button" data-act="inc" data-id="${esc(id)}" aria-label="Add one more ${esc(item.name)}">+</button>
         </div>
         <div class="cart-item-total">${money(item.price * q)}</div>
       </div>`;
@@ -190,22 +198,37 @@
       notice = `<div class="notice ok">Free delivery on this order.</div>`;
     }
     foot.innerHTML = `${notice}${billHtml(b)}
-      <button class="btn btn-primary btn-block" id="toCheckout" ${b.subtotal < C.minOrder ? "disabled" : ""}>Continue</button>`;
+      <button type="button" class="btn btn-primary btn-block" id="toCheckout" ${b.subtotal < C.minOrder ? "disabled" : ""}>Continue</button>`;
   }
 
   // ---------- Checkout ----------
-  function openCheckout() {
+  async function openCheckout() {
     const b = bill();
     if (!b.count || b.subtotal < C.minOrder) return;
     $("#cartDrawer").close();
 
-    const saved = store.get(KEYS.customer, null);
     const form = $("#checkoutForm");
+    const user = backend.enabled ? await backend.user() : null;
+    signedIn = Boolean(user);
+    $("#rememberText").textContent = signedIn
+      ? "Save these details to my account"
+      : "Remember my details on this device for next time";
+
+    let saved = null;
+    if (signedIn) {
+      try {
+        const p = await backend.getProfile();
+        if (p) saved = { name: p.full_name, phone: p.phone, address: p.address, pincode: p.pincode, landmark: p.landmark };
+      } catch { /* checkout still works without the saved profile */ }
+      if (!saved || !saved.name) saved = { ...(saved || {}), name: (user.user_metadata && user.user_metadata.full_name) || "" };
+    } else {
+      saved = store.get(KEYS.customer, null);
+    }
     if (saved && typeof saved === "object") {
       for (const k of ["name", "phone", "address", "pincode", "landmark"]) {
-        if (typeof saved[k] === "string" && !form.elements[k].value) form.elements[k].value = saved[k];
+        if (typeof saved[k] === "string" && saved[k] && !form.elements[k].value) form.elements[k].value = saved[k];
       }
-      $("#fRemember").checked = true;
+      $("#fRemember").checked = !signedIn && Boolean(store.get(KEYS.customer, null));
     }
 
     $("#fSlot").innerHTML = buildSlots().map((s) => `<option>${esc(s)}</option>`).join("");
@@ -213,9 +236,13 @@
       `<label><input type="radio" name="payment" value="${esc(p)}" ${i === 0 ? "checked" : ""} /> ${esc(p)}</label>`
     ).join("");
     $("#checkoutTotal").textContent = money(b.total);
-    $("#formError").textContent = "";
-    $$(".invalid", form).forEach((el) => el.classList.remove("invalid"));
+    clearErrors(form);
     $("#checkoutModal").showModal();
+  }
+
+  function clearErrors(form) {
+    $("#formError").textContent = "";
+    $$("[aria-invalid]", form).forEach((el) => el.removeAttribute("aria-invalid"));
   }
 
   function validate(form) {
@@ -247,7 +274,7 @@
     const ymd = `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const rnd = crypto.getRandomValues(new Uint8Array(4));
-    const words = C.brandName.match(/[A-Za-z]+/g) || [];
+    const words = C.brandName.replace(/['’]s\b/gi, "").match(/[A-Za-z]+/g) || [];
     const prefix = (words.length > 1 ? words.map((w) => w[0]).join("") : words.join("")).slice(0, 3).toUpperCase() || "CK";
     return `${prefix}-${ymd}-${Array.from(rnd, (n) => chars[n % chars.length]).join("")}`;
   }
@@ -276,33 +303,39 @@
     return lines.join("\n");
   }
 
-  function submitOrder(e) {
+  async function submitOrder(e) {
     e.preventDefault();
     const form = e.target;
-    $$(".invalid", form).forEach((el) => el.classList.remove("invalid"));
+    clearErrors(form);
     const result = validate(form);
     if (result.error) {
       $("#formError").textContent = result.error;
       const el = form.elements[result.field];
-      if (el && el.classList) { el.classList.add("invalid"); el.focus(); }
+      if (el && el.setAttribute) { el.setAttribute("aria-invalid", "true"); el.focus(); }
       return;
     }
     const v = result.value;
     const b = bill();
     const id = orderId();
-    const url = `https://wa.me/${C.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(orderMessage(id, v, b))}`;
+    const message = orderMessage(id, v, b);
+    const url = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
     if (!C.previewMode && /^9{10,}$|^919{10}$/.test(C.whatsappNumber)) {
       $("#formError").textContent = "Ordering isn't set up yet. Please call or message us directly.";
       return;
     }
 
-    if ($("#fRemember").checked) {
-      store.set(KEYS.customer, { name: v.name, phone: v.phone, address: v.address, pincode: v.pincode, landmark: v.landmark });
+    const details = { name: v.name, phone: v.phone, address: v.address, pincode: v.pincode, landmark: v.landmark };
+    if (signedIn) {
+      if ($("#fRemember").checked) {
+        backend.saveProfile({ full_name: v.name, phone: v.phone, address: v.address, pincode: v.pincode, landmark: v.landmark })
+          .catch(() => toast("Your order is fine, but we couldn't save your details to your account."));
+      }
+    } else if ($("#fRemember").checked) {
+      store.set(KEYS.customer, details);
     } else {
       store.remove(KEYS.customer);
     }
 
-    const message = orderMessage(id, v, b);
     if (C.previewMode) {
       // Sample details: show the order instead of sending it to a number that may not be ours.
       $("#successTitle").textContent = "Preview: this is the order the kitchen would get";
@@ -326,13 +359,9 @@
 
   // ---------- Page content from config ----------
   function fillContent() {
-    const hours = `${fmtTime(OPEN)} – ${fmtTime(CLOSE)}`;
-    document.title = `${C.brandName} — Order Online`;
-    $$("[data-brand]").forEach((el) => (el.textContent = C.brandName));
-    $$("[data-city]").forEach((el) => (el.textContent = C.city));
     $("#kitchenNote").textContent = C.kitchenNote;
     $("#kitchenNoteSign").textContent = C.kitchenNoteSignature;
-    $("#factHours").textContent = hours;
+    $("#factHours").textContent = `${fmtTime(OPEN)} – ${fmtTime(CLOSE)}`;
     $("#factFree").textContent = C.freeDeliveryAbove > 0 ? money(C.freeDeliveryAbove) : "—";
 
     const pill = $("#statusPill");
@@ -348,28 +377,6 @@
       ? `For now, we deliver to these pincodes in ${C.city}: ${C.serviceablePincodes.join(", ")}. We're adding more areas as we grow.`
       : `We deliver across ${C.city}.`;
     $("#faqMin").textContent = `Yes, ${money(C.minOrder)}. Delivery is ${money(C.deliveryFee)}${C.freeDeliveryAbove > 0 ? `, and free on orders above ${money(C.freeDeliveryAbove)}` : ""}.`;
-
-    $("#footerAddress").textContent = C.kitchenAddress;
-    $("#footerFssai").textContent = `FSSAI Lic. No. ${C.fssaiLicense}`;
-    $("#footerHours").textContent = `Every day, ${hours}`;
-    const phone = $("#footerPhone");
-    phone.textContent = C.phoneDisplay;
-    phone.href = `tel:+${C.whatsappNumber.replace(/\D/g, "")}`;
-    const email = $("#footerEmail");
-    email.textContent = C.email;
-    email.href = `mailto:${C.email}`;
-    $("#footerWhatsapp").href = `https://wa.me/${C.whatsappNumber.replace(/\D/g, "")}`;
-    $("#year").textContent = new Date().getFullYear();
-    $("#previewBanner").hidden = !C.previewMode;
-  }
-
-  let toastTimer;
-  function toast(msg) {
-    const t = $("#toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
   }
 
   // ---------- Events ----------
@@ -391,6 +398,7 @@
 
   function bind() {
     $("#menuGrid").addEventListener("click", onQtyClick);
+    $("#menuStatus").addEventListener("click", (e) => { if (e.target.closest("#retryMenu")) loadMenu(); });
     $("#cartBody").addEventListener("click", (e) => {
       if (e.target.closest("[data-browse]")) { $("#cartDrawer").close(); location.hash = "menu"; return; }
       onQtyClick(e);
@@ -403,14 +411,14 @@
       const chip = e.target.closest("[data-cat]");
       if (!chip) return;
       filters.category = chip.dataset.cat;
-      $$(".chip").forEach((c) => c.setAttribute("aria-selected", String(c === chip)));
+      $$(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
       renderMenu();
     });
     $("#searchInput").addEventListener("input", (e) => { filters.search = e.target.value.trim(); renderMenu(); });
     $("#vegOnly").addEventListener("change", (e) => { filters.vegOnly = e.target.checked; renderMenu(); });
 
     $("#checkoutForm").addEventListener("submit", submitOrder);
-    $("#checkoutForm").addEventListener("input", (e) => e.target.classList.remove("invalid"));
+    $("#checkoutForm").addEventListener("input", (e) => e.target.removeAttribute("aria-invalid"));
     $("#fPhone").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); });
     $("#fPincode").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6); });
 
@@ -420,20 +428,16 @@
       });
     }
 
-    $("#forgetMe").addEventListener("click", () => {
-      store.remove(KEYS.customer);
-      store.remove(KEYS.cart);
+    document.addEventListener("ck:forget", () => {
       cart = {};
       renderCartState();
-      const form = $("#checkoutForm");
-      form.reset();
-      toast("Done. Nothing about you is saved on this device.");
+      $("#checkoutForm").reset();
     });
   }
 
-  fillContent();
-  renderChips();
-  renderMenu();
-  renderCartState();
-  bind();
+  document.addEventListener("DOMContentLoaded", () => {
+    fillContent();
+    bind();
+    loadMenu();
+  });
 })();

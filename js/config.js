@@ -46,5 +46,26 @@ window.CK_CONFIG = {
 
   // Shown in the privacy policy. Who customers can contact about their data.
   privacyContactName: "Owner name",
-  privacyPolicyUpdated: "22 October 2026",
+  privacyPolicyUpdated: "23 October 2026",
+
+  // Required by the Consumer Protection (E-Commerce) Rules, 2020: who runs the
+  // business and who handles complaints. Shown on the Terms page.
+  legalName: "Jisha's Pantry (proprietor: Owner name)",
+  grievanceOfficer: {
+    name: "Owner name",
+    designation: "Proprietor",
+    email: "hello@example.com",
+    phone: "+91 99999 99999",
+  },
+  termsUpdated: "23 October 2026",
+
+  // Public web address of the site (used for sharing previews and search engines).
+  siteUrl: "https://kiruthika12504.github.io/jishas-pantry/",
+
+  // Supabase backend: customer accounts and the admin menu editor.
+  // Paste the Project URL and the anon / publishable key from Supabase → Connect.
+  // The anon key is meant to be public. NEVER put the service_role / secret key here.
+  // Leave both empty to run without accounts (the menu then comes from js/menu.js).
+  supabaseUrl: "",
+  supabaseAnonKey: "",
 };

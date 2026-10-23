@@ -1,0 +1,15 @@
+{
+  "name": "Jisha's Pantry",
+  "short_name": "Jisha's Pantry",
+  "description": "Home-style food from a small cloud kitchen in Chennai.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5f4",
+  "theme_color": "#232c29",
+  "lang": "en-IN",
+  "icons": [
+    { "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

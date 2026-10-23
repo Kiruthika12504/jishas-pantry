@@ -1,0 +1,7 @@
+# Takes effect once the site is on its own domain (e.g. jishaspantry.in).
+# Admin and account pages also carry their own "noindex" tag, which works everywhere.
+User-agent: *
+Disallow: /admin.html
+Disallow: /account.html
+
+Sitemap: https://kiruthika12504.github.io/jishas-pantry/sitemap.xml
