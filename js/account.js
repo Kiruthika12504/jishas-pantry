@@ -128,7 +128,11 @@
         if (p.phone && !/^[6-9]\d{9}$/.test(p.phone)) throw new Error("Please enter a valid 10-digit mobile number, or leave it empty.");
         if (p.pincode && !/^\d{6}$/.test(p.pincode)) throw new Error("Please enter a 6-digit pincode, or leave it empty.");
         await backend.saveProfile(p);
-        $("#profileOk").textContent = "Saved.";
+        $("#profileOk").textContent = "Saved. We'll fill these in for you at checkout.";
+        toast("Delivery details saved.");
+        const btn = $("#saveProfile");
+        btn.textContent = "Saved ✓";
+        setTimeout(() => { btn.textContent = "Save details"; }, 2500);
       });
     });
     $("#pPhone").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); });
