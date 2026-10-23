@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Database setup — Jisha's Pantry</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f3f5f4" />
+  <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="js/theme.js"></script>
+  <script src="js/setup.js" defer></script>
+</head>
+<body>
+  <main class="container narrow page">
+    <h1>Database setup</h1>
+    <p class="muted">For the site owner, once. In Supabase, open <strong>SQL Editor</strong> → <strong>New query</strong>. Then for each part below, in order:</p>
+    <ol>
+      <li>Tap <strong>Copy part</strong>.</li>
+      <li>In the SQL Editor, clear the box, paste, and tap <strong>Run</strong>.</li>
+      <li>Wait for <strong>"Success"</strong>, then come back for the next part.</li>
+    </ol>
+    <p class="muted small">If Supabase warns about a "destructive operation", that's the script replacing its own old rules. It's safe; choose <strong>Run this query</strong>.</p>
+    <p class="menu-status" id="status" role="status">Loading the setup script…</p>
+    <div class="stack" id="parts"></div>
+    <div class="card" id="after" hidden>
+      <h2>Last step: login links</h2>
+      <p>In Supabase: <strong>Authentication</strong> → <strong>URL Configuration</strong>.</p>
+      <ul>
+        <li><strong>Site URL:</strong> <code>https://kiruthika12504.github.io/jishas-pantry/</code></li>
+        <li><strong>Redirect URLs → Add URL:</strong> <code>https://kiruthika12504.github.io/jishas-pantry/account.html</code></li>
+      </ul>
+      <p>Save. That's everything.</p>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
