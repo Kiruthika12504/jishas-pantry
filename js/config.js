@@ -66,6 +66,6 @@ window.CK_CONFIG = {
   // Paste the Project URL and the anon / publishable key from Supabase → Connect.
   // The anon key is meant to be public. NEVER put the service_role / secret key here.
   // Leave both empty to run without accounts (the menu then comes from js/menu.js).
-  supabaseUrl: "",
-  supabaseAnonKey: "",
+  supabaseUrl: "https://vuxgscjwtwqzqmfphmiv.supabase.co",
+  supabaseAnonKey: "sb_publishable_W9oWXPa9XIPdjdIGztOIjA_6jTywpS3",
 };
